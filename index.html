@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>List of Users</title>
+</head>
+
+<body>
+  <div id="app">
+    <table class="table">
+      <tr>
+        <td colspan="2">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Fullname" aria-label="Fullname"
+              aria-describedby="basic-addon1" v-model="input.fullname" maxlength="100" required>
+          </div>
+        </td>
+        <td>
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon3">Date of Birth</span>
+            </div>
+            <input type="date" class="form-control" id="dob" aria-describedby="basic-addon3" v-model="input.dob"
+              required>
+          </div>
+        </td>
+        <td>
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Address" aria-label="Address"
+              aria-describedby="basic-addon1" v-model="input.address" maxlength="100" required>
+          </div>
+        </td>
+        <td>
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="City" aria-label="City" aria-describedby="basic-addon1"
+              v-model="input.city" maxlength="100" required>
+          </div>
+        </td>
+        <td>
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon3">+7</span>
+            <input type="tel" class="form-control" placeholder="Phone" aria-label="Phone"
+              aria-describedby="basic-addon1" v-model="input.phone" maxlength="10" required>
+          </div>
+        </td>
+        <td>
+          <button type="button" class="btn btn-primary" @click="addUser">Add</button>
+        </td>
+      </tr>
+    </table>
+    <ul class="errors">
+      <li v-show="!validation.fullname">Name cannot be empty.</li>
+    </ul>
+
+    <h2 class="head" v-show="users.length">List of users</h2>
+    <table class="table" v-show="users.length">
+      <thead>
+        <tr>
+          <th scope="col" v-for="column in columns">
+            {{ column }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(user,index) in users">
+          <th scope="row"> {{index}}</th>
+          <td>
+            {{user.fullname}}
+          </td>
+          <td>
+            {{user.dob}}
+          </td>
+          <td>
+            {{user.address}}
+          </td>
+          <td>
+            {{user.city}}
+          </td>
+          <td>
+            {{user.phone}}
+          </td>
+          <td>
+            <button type="button" class="btn btn-warning" @click="update(index)">Update</button>
+            <button type="button" class="btn btn-danger" @click="removeUser(index)">Remove</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        columns: ['Index', 'Full Name', 'Date of birth', 'Address', 'City', 'Phone'],
+        users: [{
+            "fullname": "Gwenyth York",
+            "dob": "1992-5-11",
+            "address": "Gavel   Way, 4056",
+            "city": "Honolulu",
+            "phone": "2-731-530-1862"
+          },
+          {
+            "fullname": "Chuck Moreno",
+            "dob": "1975-7-23",
+            "address": "Billing  Vale, 2547",
+            "city": "Washington",
+            "phone": "8-612-877-6457"
+          },
+          {
+            "fullname": "Johnathan Tobin",
+            "dob": "2015-7-30",
+            "address": "Ensign   Street, 4006",
+            "city": "Laredo",
+            "phone": "7-432-263-0625"
+          },
+          {
+            "fullname": "Marigold Stark",
+            "dob": "1989-9-14",
+            "address": "Sundown Street, 2625",
+            "city": "Sacramento",
+            "phone": "7-276-116-6208"
+          },
+        ],
+        input: {
+          fullname: "",
+          dob: "",
+          address: "",
+          city: "",
+          phone: ""
+        },
+      },
+      mounted() {
+        if (localStorage.getItem('users')) {
+          try {
+            this.users = JSON.parse(localStorage.getItem('users'));
+          } catch (e) {
+            localStorage.removeItem('users');
+          }
+        }
+      },
+      computed: {
+        validation() {
+          return {
+            fullname: !!this.input.fullname.trim(),
+          }
+        },
+        isValid() {
+          const validation = this.validation;
+          return Object.keys(validation).every(function (key) {
+            return validation[key];
+          })
+        }
+      },
+      methods: {
+        saveUsers() {
+          const parsed = JSON.stringify(this.users);
+          localStorage.setItem('users', parsed);
+        },
+        addUser() {
+          if (this.isValid) {
+            this.users.push({
+              fullname: this.input.fullname,
+              dob: this.input.dob,
+              address: this.input.address,
+              city: this.input.city,
+              phone: this.input.phone
+            });
+          }
+          for (const key in this.input) {
+            this.input[key] = '';
+          }
+          this.saveUsers();
+        },
+        update(index) {
+          this.input = this.users[index];
+          this.users.splice(index, 1);
+        },
+        removeUser(index) {
+          this.users.splice(index, 1);
+          this.saveUsers();
+        },
+      }
+    });
+    Vue.config.devtools = true;
+  </script>
+</body>
+
+</html>
