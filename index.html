@@ -24,10 +24,26 @@
         <td>
           <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <span class="input-group-text" id="basic-addon3">Date of Birth</span>
+              <label class="input-group-text">Date of Birth</label>
             </div>
-            <input type="date" class="form-control" id="dob" aria-describedby="basic-addon3" v-model="input.dob"
-              required>
+            <select class="custom-select" v-model="dob.day">
+              <option value="">{{ days.title }}</option>
+              <option aria-describedby="basic-addon3" v-for="day in days.array">
+                {{ day }}
+              </option>
+            </select>
+            <select class="custom-select" v-model="dob.month">
+              <option value="">{{ months.title }}</option>
+              <option aria-describedby="basic-addon3" v-for="month in months.array">
+                {{ month }}
+              </option>
+            </select>
+            <select class="custom-select" v-model="dob.year">
+              <option value="">{{ years.title }}</option>
+              <option aria-describedby="basic-addon3" v-for="year in years.array">
+                {{ year }}
+              </option>
+            </select>
           </div>
         </td>
         <td>
@@ -58,7 +74,7 @@
       <li v-show="!validation.fullname">Name cannot be empty.</li>
     </ul>
 
-    <h2 class="head" v-show="users.length">List of users</h2>
+    <h2 class="head" v-show="users.length" v-text="title"></h2>
     <table class="table" v-show="users.length">
       <thead>
         <tr>
@@ -96,10 +112,15 @@
   </div>
 
   <script>
+    const getArray = (length, startNumber = 1) => {
+      const result = Array.apply(0, Array(length)).map((element, index) => index + startNumber);
+      return result;
+    };
     const app = new Vue({
       el: '#app',
       data: {
         columns: ['Index', 'Full Name', 'Date of birth', 'Address', 'City', 'Phone'],
+        title: 'List of Users',
         users: [{
             "fullname": "Gwenyth York",
             "dob": "1992-5-11",
@@ -136,6 +157,23 @@
           city: "",
           phone: ""
         },
+        days: {
+          title: 'Day',
+          array: getArray(31),
+        },
+        months: {
+          title: 'Month',
+          array: getArray(12),
+        },
+        years: {
+          title: 'Year',
+          array: getArray(100, 1919).reverse(),
+        },
+        dob: {
+          day: '',
+          month: '',
+          year: '',
+        }
       },
       mounted() {
         if (localStorage.getItem('users')) {
@@ -157,7 +195,8 @@
           return Object.keys(validation).every(function (key) {
             return validation[key];
           })
-        }
+        },
+
       },
       methods: {
         saveUsers() {
@@ -168,7 +207,7 @@
           if (this.isValid) {
             this.users.push({
               fullname: this.input.fullname,
-              dob: this.input.dob,
+              dob: `${this.dob.year}-${this.dob.month}-${this.dob.day}`,
               address: this.input.address,
               city: this.input.city,
               phone: this.input.phone
